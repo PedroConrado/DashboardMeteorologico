@@ -315,10 +315,17 @@ def update_graphs(contents, start_date, end_date, selected_variables, explorator
             # Atualizando o valor do gráfico de precipitação e temperatura no retorno
             fig_station = fig_climogram
 
-        if len(selected_variables) == 1 and df_filtered['DATA'].dt.year.nunique() > 1:
-            df_filtered['Estação'] = pd.cut(df_filtered['DATA'].dt.month % 12 + 1, bins=[0, 3, 6, 9, 12], labels=['Verão', 'Outono', 'Inverno', 'Primavera'])
-            fig_station = px.bar(df_filtered.groupby('Estação')[selected_variables].mean().reset_index(), x='Estação', y=selected_variables, title="Comparação por Estação")
-            style_station = {'display': 'block'}
+        if len(selected_variables) == 1:
+            var = selected_variables[0]
+            fig_boxplot = px.box(df_filtered, y=var, title=f"Boxplot de {var}")
+
+            fig_histograms.append(dcc.Graph(figure=fig_boxplot))
+            style_histogram = {'display': 'block'}
+        
+            if df_filtered['DATA'].dt.year.nunique() > 1:
+                df_filtered['Estação'] = pd.cut(df_filtered['DATA'].dt.month % 12 + 1, bins=[0, 3, 6, 9, 12], labels=['Verão', 'Outono', 'Inverno', 'Primavera'])
+                fig_station = px.bar(df_filtered.groupby('Estação')[selected_variables].mean().reset_index(), x='Estação', y=selected_variables, title="Comparação por Estação")
+                style_station = {'display': 'block'}
         
         # Matriz de correlação (somente se mais de uma variável for selecionada)
         if len(selected_variables) > 1:
